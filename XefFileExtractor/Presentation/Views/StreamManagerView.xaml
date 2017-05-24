@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="XefFileExtractor.Presentation.Views.StreamView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:XefFileExtractor.Presentation.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Menu x:Name="Menu" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open" HorizontalAlignment="Left" Width="139.5" Command="{Binding OpenCommand}"/>
+                <MenuItem Header="_Close" HorizontalAlignment="Left" Width="139.5" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+        </Menu>
+        <DataGrid x:Name="StreamListGrid" Grid.Row="1" ItemsSource="{Binding SelectionService.Streams}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn Header="Extract" Binding="{Binding Path=IsSelected, UpdateSourceTrigger=PropertyChanged}"/>
+                <DataGridTextColumn Header="Stream Name" Binding="{Binding Name}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

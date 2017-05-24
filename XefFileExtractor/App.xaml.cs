@@ -1,42 +1,50 @@
-﻿using System.ComponentModel.Composition;
+﻿using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Reflection;
-using System.Waf.Foundation;
+using System.Linq;
+using System.Waf;
+using System.Waf.Applications;
 using System.Windows;
-using XefFileExtractor.Applications.Controllers;
 
-namespace XefFileExtractor
-{
-    public partial class App : Application
-    {
+namespace XefFileExtractor {
+    public partial class App : Application {
         private AggregateCatalog catalog;
         private CompositionContainer container;
-        private ApplicationController controller;
+        private IEnumerable<IModuleController> moduleControllers;
 
 
-        protected override void OnStartup(StartupEventArgs e)
-        {
+        protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
 
             catalog = new AggregateCatalog();
             // Add the WpfApplicationFramework assembly to the catalog
-            catalog.Catalogs.Add(new AssemblyCatalog(typeof(Model).Assembly));
+            catalog.Catalogs.Add(new AssemblyCatalog(typeof(WafConfiguration).Assembly));
+            //catalog.Catalogs.Add(new AssemblyCatalog(typeof(System.Waf.Foundation.Model).Assembly));
+            //catalog.Catalogs.Add(new AssemblyCatalog(typeof(ShellViewModel).Assembly));
             // Add the WafApplication assembly to the catalog
-            catalog.Catalogs.Add(new AssemblyCatalog(Assembly.GetExecutingAssembly()));
+            //catalog.Catalogs.Add(new AssemblyCatalog(Assembly.GetExecutingAssembly()));
+            catalog.Catalogs.Add(new AssemblyCatalog(typeof(App).Assembly));
 
             container = new CompositionContainer(catalog, CompositionOptions.DisableSilentRejection);
             CompositionBatch batch = new CompositionBatch();
             batch.AddExportedValue(container);
             container.Compose(batch);
 
-            controller = container.GetExportedValue<ApplicationController>();
-            controller.Initialize();
-            controller.Run();
+            // Initialize and run all module controllers
+            moduleControllers = container.GetExportedValues<IModuleController>();
+            foreach (var moduleController in moduleControllers) {
+                moduleController.Initialize();
+            }
+            foreach (var moduleController in moduleControllers) {
+                moduleController.Run();
+            }
         }
 
-        protected override void OnExit(ExitEventArgs e)
-        {
-            controller.Shutdown();
+        protected override void OnExit(ExitEventArgs e) {
+            // Shutdown the module controllers in reverse order
+            foreach (var moduleController in moduleControllers.Reverse()) {
+                moduleController.Shutdown();
+            }
             container.Dispose();
             catalog.Dispose();
 

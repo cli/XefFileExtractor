@@ -42,6 +42,8 @@
     <ApplicationIcon>Presentation\Resources\Images\Application.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Kinect, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Kinect.Tools, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=AMD64" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -60,14 +62,38 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Applications\Controllers\ApplicationController.cs" />
+    <Compile Include="Applications\Controllers\ControlController.cs" />
+    <Compile Include="Applications\Controllers\StreamManagerController.cs" />
+    <Compile Include="Applications\Controllers\ModuleController.cs" />
+    <Compile Include="Applications\Services\ISelectionService.cs" />
+    <Compile Include="Applications\Services\IShellService.cs" />
+    <Compile Include="Applications\Services\SelectionService.cs" />
+    <Compile Include="Applications\Services\ShellService.cs" />
+    <Compile Include="Applications\ViewModels\ControlViewModel.cs" />
+    <Compile Include="Applications\ViewModels\PropertyViewModel.cs" />
     <Compile Include="Applications\ViewModels\ShellViewModel.cs" />
+    <Compile Include="Applications\ViewModels\StreamManagerViewModel.cs" />
+    <Compile Include="Applications\Views\IControlView.cs" />
+    <Compile Include="Applications\Views\IPropertyView.cs" />
     <Compile Include="Applications\Views\IShellView.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Domain\Class1.cs" />
+    <Compile Include="Domain\KinectAudio.cs" />
+    <Compile Include="Domain\KinectBody.cs" />
+    <Compile Include="Domain\KinectDepth.cs" />
+    <Compile Include="Domain\KinectIr.cs" />
+    <Compile Include="Utils.cs" />
     <Page Include="Presentation\Resources\ImageResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Presentation\Views\ControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Presentation\Views\PropertyView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -75,10 +101,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Presentation\Views\StreamManagerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Applications\Views\IStreamManagerView.cs" />
+    <Compile Include="Domain\KinectColor.cs" />
+    <Compile Include="Domain\KinectFile.cs" />
+    <Compile Include="Domain\KinectStream.cs" />
+    <Compile Include="Presentation\Views\ControlView.xaml.cs">
+      <DependentUpon>ControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Presentation\Views\PropertyView.xaml.cs">
+      <DependentUpon>PropertyView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Presentation\Views\ShellWindow.xaml.cs">
       <DependentUpon>ShellWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Presentation\Views\StreamManagerView.xaml.cs">
+      <DependentUpon>StreamManagerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
