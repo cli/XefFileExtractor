@@ -39,7 +39,7 @@ namespace XefFileExtractor.Applications.Controllers {
         public int CurrentProgress {
             get { return _currentProgress; }
             private set {
-                if (_currentProgress < value) {
+                if (_currentProgress != value) {
                     _currentProgress = value;
                     ControlViewModel.SetProgress(value);
                 }
@@ -61,8 +61,7 @@ namespace XefFileExtractor.Applications.Controllers {
             var streams = _selectionService.SelectedStreams.Select(x => x);
 
             foreach (var stream in streams) {
-                // TODO: Should I use the view model this way?
-                ControlViewModel.SetProgress(0);
+                CurrentProgress = 0;
                 stream.ProgressUpdated += KProgressChanged;
                 // TODO: Should I use the view model this way?
                 stream.Extract(ControlViewModel.OutputDirectory);
@@ -71,7 +70,9 @@ namespace XefFileExtractor.Applications.Controllers {
 
         void KProgressChanged(object sender, EventArgs e) {
             KinectFileProgressChangedEventArgs kargs = (KinectFileProgressChangedEventArgs) e;
-            CurrentProgress = kargs.Progress;
+            if (kargs.Progress > CurrentProgress) {
+                CurrentProgress = kargs.Progress;
+            }
         }
     }
 }

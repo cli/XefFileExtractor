@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.Kinect.Tools;
 
 namespace XefFileExtractor.Domain {
@@ -18,11 +17,13 @@ namespace XefFileExtractor.Domain {
         public int DroppedFrames { get; set; }
         public List<int> DroppedIndices { get; set; }
         public int FrameCount { get; set; }
+        public List<int> FrameMap { get; set; }
 
         public FrameAnalysis() {
             DroppedFrames = 0;
             DroppedIndices = new List<int>();
             FrameCount = 0;
+            FrameMap = new List<int>();
         }
     }
 

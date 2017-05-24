@@ -9,6 +9,7 @@ namespace XefFileExtractor.Applications.ViewModels {
     public class ControlViewModel : ViewModel<IControlView> {
         private ICommand _extractCommand;
         private string _outputPath;
+        private string _statusText;
 
         [ImportingConstructor]
         public ControlViewModel(IControlView view, IShellService shellService) : base(view) {
@@ -23,8 +24,13 @@ namespace XefFileExtractor.Applications.ViewModels {
         }
 
         public string OutputDirectory {
-            get { return _outputPath; }
-            set { SetProperty(ref _outputPath, value); }
+            get => _outputPath;
+            set => SetProperty(ref _outputPath, value);
+        }
+
+        public string StatusText {
+            get => _statusText;
+            set => SetProperty(ref _statusText, value);
         }
 
         public int GetProgress() {

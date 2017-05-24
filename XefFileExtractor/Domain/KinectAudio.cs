@@ -6,8 +6,11 @@ using Microsoft.Kinect.Tools;
 namespace XefFileExtractor.Domain {
     public class KinectAudio : KinectStream {
         private const double FrameTime = 16;
+        private FrameAnalysis _frameAnalysis;
 
-        public KinectAudio(KStudioEventStream stream) : base(stream) { }
+        public KinectAudio(KStudioEventStream stream) : base(stream) {
+            _frameAnalysis = CountDroppedFrames();
+        }
 
         public override void Extract(string outputPath) {
             KStudioSeekableEventStream stream = (KStudioSeekableEventStream) _stream;
@@ -21,7 +24,6 @@ namespace XefFileExtractor.Domain {
             int bytePos = 0;
 
             // DEBUG
-            double totalMissedTime = 0;
             int missedFrames = 0;
             double cumulativeTime = 0;
             double lDiff = 0;
@@ -54,7 +56,6 @@ namespace XefFileExtractor.Domain {
 
                 missedTime = diff - missedTime;
                 cumulativeTime += missedTime;
-                totalMissedTime += missedTime;
                 while (cumulativeTime > 16) {
                     cumulativeTime -= 16;
                     missedFrames++;
@@ -104,8 +105,6 @@ namespace XefFileExtractor.Domain {
                     missedTime += 16;
                 } while (j <= (int) currEvent.EventDataSize);
 
-                offset = 96;
-
                 // If there is any missed time, add it here.
                 missedTime = diff - missedTime;
                 cumulativeTime += missedTime;
@@ -148,6 +147,8 @@ namespace XefFileExtractor.Domain {
         public override FrameAnalysis CountDroppedFrames() {
             double prevFrameTime = 0;
             double cumulativeTime = 0;
+            int lastGoodEvent = 0;
+            int eventIndex = 0;
             int eventFrameSize = 14432;
             FrameAnalysis result = new FrameAnalysis();
 
@@ -157,11 +158,10 @@ namespace XefFileExtractor.Domain {
                 double currentFrameTime = header.RelativeTime.TotalMilliseconds;
                 double deltaTime = currentFrameTime - prevFrameTime;
 
-                result.FrameCount++;
                 double missedTime = 0;
-
                 int j = 0;
 
+                // Determine if there are missed frames.
                 do {
                     j += eventFrameSize - 16;
                     missedTime += FrameTime;
@@ -169,12 +169,22 @@ namespace XefFileExtractor.Domain {
 
                 missedTime = deltaTime - missedTime;
                 cumulativeTime += missedTime;
-                while (cumulativeTime > FrameTime) {
-                    cumulativeTime -= FrameTime;
-                    result.DroppedFrames++;
-                    result.DroppedIndices.Add(result.FrameCount++);
+
+                if (cumulativeTime > FrameTime) {
+                    while (cumulativeTime > FrameTime) {
+                        cumulativeTime -= FrameTime;
+                        result.DroppedFrames++;
+                        result.FrameMap.Add(lastGoodEvent);
+                        result.DroppedIndices.Add(result.FrameCount++);
+                    }
+                }
+                else {
+                    lastGoodEvent = eventIndex;
+                    result.FrameMap.Add(lastGoodEvent);
+                    result.FrameCount++;
                 }
 
+                eventIndex++;
                 prevFrameTime = currentFrameTime;
             }
 

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -33,11 +34,7 @@ namespace XefFileExtractor.Domain {
                     byte[] colorRgba = new byte[ColorWidth * ColorHeight * 4];
 
                     // Determine if this frame was a dropped frame
-                    int frameIndex = (int) index;
-
-                    while (_frameAnalysis.DroppedIndices.IndexOf(frameIndex) != -1) {
-                        frameIndex--;
-                    }
+                    int frameIndex = _frameAnalysis.FrameMap[(int) index];
 
                     var currEvent = stream.ReadEvent((uint) frameIndex);
                     currEvent.CopyEventDataToArray(colorData, 0);
@@ -89,11 +86,11 @@ namespace XefFileExtractor.Domain {
                     }
                     catch (IOException) { }
 
-                    colorTiming[index] = currEvent.RelativeTime.TotalMilliseconds;
+                    colorTiming[frameIndex] = currEvent.RelativeTime.TotalMilliseconds;
 
                     // Update progress
                     OnProgressUpdated(new KinectFileProgressChangedEventArgs {
-                        Progress = (int) ((float) (frameIndex + 1) / frameCount * 100),
+                        Progress = (int) ((float) ((int) index + 1) / frameCount * 100),
                         StatusName = Name
                     });
                 });
@@ -117,6 +114,8 @@ namespace XefFileExtractor.Domain {
         public override FrameAnalysis CountDroppedFrames() {
             double prevFrameTime = 0;
             double cumulativeTime = 0;
+            int lastGoodEvent = 0;
+            int eventIndex = 0;
             FrameAnalysis result = new FrameAnalysis();
 
             KStudioSeekableEventStream stream = (KStudioSeekableEventStream) _stream;
@@ -125,15 +124,22 @@ namespace XefFileExtractor.Domain {
                 double currentFrameTime = header.RelativeTime.TotalMilliseconds;
                 double deltaTime = currentFrameTime - prevFrameTime;
 
-                result.FrameCount++;
-                cumulativeTime += (deltaTime - FrameTime);
+                cumulativeTime += deltaTime - FrameTime;
 
-                while (cumulativeTime > FrameTime) {
-                    result.DroppedFrames++;
-                    cumulativeTime -= FrameTime;
-                    result.DroppedIndices.Add(result.FrameCount++);
+                if (cumulativeTime > FrameTime) {
+                    do {
+                        result.DroppedFrames++;
+                        cumulativeTime -= FrameTime;
+                        result.FrameMap.Add(lastGoodEvent);
+                        result.DroppedIndices.Add(result.FrameCount++);
+                    } while (cumulativeTime > FrameTime);
+                } else {
+                    lastGoodEvent = eventIndex;
+                    result.FrameMap.Add(lastGoodEvent);
+                    result.FrameCount++;
                 }
 
+                eventIndex++;
                 prevFrameTime = currentFrameTime;
             }
 
