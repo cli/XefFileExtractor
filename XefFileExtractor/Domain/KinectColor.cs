@@ -76,7 +76,7 @@ namespace XefFileExtractor.Domain {
 
                     string filePath = outputPath + "/Kinect_Output/Color/";
                     Directory.CreateDirectory(filePath);
-                    string path = Path.Combine(filePath, "ColorFrame_" + frameIndex + ".bmp");
+                    string path = Path.Combine(filePath, "ColorFrame_" + index + ".bmp");
 
                     // write the new file to disk
                     try {
