@@ -51,6 +51,7 @@ namespace XefFileExtractor.Applications.Controllers {
 
             ControlViewModel.ExtractCommand = _extractCommand;
             ControlViewModel.OutputDirectory = Directory.GetCurrentDirectory();
+            ControlViewModel.StatusText = "Idle";
         }
 
         public void Run() { }
@@ -61,10 +62,9 @@ namespace XefFileExtractor.Applications.Controllers {
             var streams = _selectionService.SelectedStreams.Select(x => x);
 
             foreach (var stream in streams) {
-                CurrentProgress = 0;
                 stream.ProgressUpdated += KProgressChanged;
-                // TODO: Should I use the view model this way?
                 stream.Extract(ControlViewModel.OutputDirectory);
+                CurrentProgress = 0;
             }
         }
 

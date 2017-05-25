@@ -21,7 +21,7 @@
         <Label x:Name="OutputDirectoryLabel" Grid.Row="0" Grid.Column="0" Content="Output Directory" />
         <TextBox x:Name="OutputDirectoryTextBox" Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Text="{Binding OutputDirectory}"/>
 
-        <Label x:Name="StatusLabel" Content="{Binding StatusText}" Grid.Row="1" Grid.Column="0" />
+        <Label x:Name="StatusLabel" Content="{Binding Path=StatusText, Mode=TwoWay}" Grid.Row="1" Grid.Column="0" />
         <ProgressBar x:Name="ProgressBar" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="1"/>
 
     </Grid>
