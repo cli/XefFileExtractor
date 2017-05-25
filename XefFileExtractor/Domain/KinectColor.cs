@@ -114,11 +114,12 @@ namespace XefFileExtractor.Domain {
         public override FrameAnalysis CountDroppedFrames() {
             double prevFrameTime = 0;
             double cumulativeTime = 0;
-            int lastGoodEvent = 0;
             int eventIndex = 0;
             FrameAnalysis result = new FrameAnalysis();
 
             KStudioSeekableEventStream stream = (KStudioSeekableEventStream) _stream;
+
+            prevFrameTime = stream.StartRelativeTime.TotalMilliseconds;
 
             foreach (KStudioEventHeader header in stream.EventHeaders) {
                 double currentFrameTime = header.RelativeTime.TotalMilliseconds;
@@ -126,17 +127,14 @@ namespace XefFileExtractor.Domain {
 
                 cumulativeTime += deltaTime - FrameTime;
 
-                if (cumulativeTime > FrameTime) {
-                    do {
-                        result.DroppedFrames++;
-                        cumulativeTime -= FrameTime;
-                        result.FrameMap.Add(lastGoodEvent);
-                        result.DroppedIndices.Add(result.FrameCount++);
-                    } while (cumulativeTime > FrameTime);
-                } else {
-                    lastGoodEvent = eventIndex;
-                    result.FrameMap.Add(lastGoodEvent);
-                    result.FrameCount++;
+                result.FrameCount++;
+                result.FrameMap.Add(eventIndex);
+
+                while (cumulativeTime > FrameTime) {
+                    result.DroppedFrames++;
+                    cumulativeTime -= FrameTime;
+                    result.FrameMap.Add(eventIndex);
+                    result.DroppedIndices.Add(result.FrameCount++);
                 }
 
                 eventIndex++;
