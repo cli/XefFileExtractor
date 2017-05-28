@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Waf.Applications;
+using System.Windows;
 using XefFileExtractor.Applications.Services;
 using XefFileExtractor.Applications.ViewModels;
 using XefFileExtractor.Domain;
@@ -62,6 +63,10 @@ namespace XefFileExtractor.Applications.Controllers {
             var streams = _selectionService.SelectedStreams.Select(x => x);
 
             foreach (var stream in streams) {
+                // Does not update from background thread unless we invoke using dispatcher
+                Application.Current.Dispatcher.InvokeAsync(() => {
+                    ControlViewModel.StatusText = stream.Name;
+                });
                 stream.ProgressUpdated += KProgressChanged;
                 stream.Extract(ControlViewModel.OutputDirectory);
                 CurrentProgress = 0;
