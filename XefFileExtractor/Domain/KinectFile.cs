@@ -28,7 +28,7 @@ namespace XefFileExtractor.Domain {
     }
 
     public class KinectFile : System.Waf.Foundation.Model {
-        private readonly KStudioEventFile _currentKinectFile = null;
+        private readonly KStudioEventFile _currentKinectFile;
         private readonly List<KinectStream> _streams;
 
         public KinectFile(string filePath) {

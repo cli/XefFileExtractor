@@ -1,6 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -31,7 +32,6 @@ namespace XefFileExtractor.Domain {
                         PixelFormats.Bgr32,
                         null);
                     byte[] colorData = new byte[ColorWidth * ColorHeight * 2];
-                    byte[] colorRgba = new byte[ColorWidth * ColorHeight * 4];
 
                     // Determine if this frame was a dropped frame
                     int frameIndex = _frameAnalysis.FrameMap[(int) index];
@@ -39,33 +39,8 @@ namespace XefFileExtractor.Domain {
                     var currEvent = stream.ReadEvent((uint) frameIndex);
                     currEvent.CopyEventDataToArray(colorData, 0);
 
-                    for (int i = 0; i < (ColorWidth * ColorHeight) / 2; i++) {
-                        int y0 = colorData[(i << 2) + 0] - 16;
-                        int u = colorData[(i << 2) + 1] - 128;
-                        int y1 = colorData[(i << 2) + 2] - 16;
-                        int v = colorData[(i << 2) + 3] - 128;
-
-                        byte r = Utils.ClipToByte((298 * y0 + 409 * v + 128) >> 8);
-                        byte g = Utils.ClipToByte((298 * y0 - 100 * u - 208 * v + 128) >> 8);
-                        byte b = Utils.ClipToByte((298 * y0 + 516 * u + 128) >> 8);
-
-                        colorRgba[(i << 3) + 0] = b;
-                        colorRgba[(i << 3) + 1] = g;
-                        colorRgba[(i << 3) + 2] = r;
-                        colorRgba[(i << 3) + 3] = 0xFF; // A
-
-                        r = Utils.ClipToByte((298 * y1 + 409 * v + 128) >> 8);
-                        g = Utils.ClipToByte((298 * y1 - 100 * u - 208 * v + 128) >> 8);
-                        b = Utils.ClipToByte((298 * y1 + 516 * u + 128) >> 8);
-
-                        colorRgba[(i << 3) + 4] = b;
-                        colorRgba[(i << 3) + 5] = g;
-                        colorRgba[(i << 3) + 6] = r;
-                        colorRgba[(i << 3) + 7] = 0xFF;
-                    }
-
-                    int stride = (PixelFormats.Bgr32.BitsPerPixel) * 1920 / 8;
-                    colorBitmap.WritePixels(new Int32Rect(0, 0, 1920, 1080), colorRgba, stride, 0);
+                    NativeMethods.YUY2ToBGR(colorData, 1920 * 1080 / 2, colorBitmap.BackBuffer, 1920 * 1080 * 4);
+                    colorBitmap.WritePixels(new Int32Rect(0, 0, 1920, 1080), colorBitmap.BackBuffer, 1920 * 1080 * 4, colorBitmap.BackBufferStride);
 
                     // create a png bitmap encoder which knows how to save a .png file
                     //BitmapEncoder encoder = new PngBitmapEncoder();
@@ -142,6 +117,11 @@ namespace XefFileExtractor.Domain {
             }
 
             return result;
+        }
+
+        private static class NativeMethods {
+            [DllImport("ColorConversions.dll", CallingConvention = CallingConvention.StdCall)]
+            public static extern void YUY2ToBGR(byte[] pYUYV, int width, IntPtr pRGBA, int outSize);
         }
     }
 }
