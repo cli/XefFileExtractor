@@ -11,11 +11,26 @@ namespace XefFileExtractor {
                     : ((p_ValueToClip > byte.MaxValue) ? byte.MaxValue : p_ValueToClip));
         }
 
-        public static void WriteTimingToFile(string filepath, double[] timing) {
-            using (StreamWriter file = new StreamWriter(filepath)) {
-                foreach (double time in timing) {
+        public static void WriteTimingToFile(string filepath, double[] timing)
+        {
+            using (StreamWriter file = new StreamWriter(filepath))
+            {
+                foreach (double time in timing)
+                {
                     file.WriteLine(time.ToString());
                 }
+            }
+        }
+
+        /// <summary>
+        /// Checks if the given directory exists. If not it is tried to create it.
+        /// </summary>
+        /// <param name="path"></param>
+        public static void ExistOrCreateDirectory(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
             }
         }
 

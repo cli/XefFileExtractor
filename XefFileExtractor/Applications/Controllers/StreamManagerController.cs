@@ -52,7 +52,7 @@ namespace XefFileExtractor.Applications.Controllers {
 
         private void CloseProgram() { }
 
-        private async void UpdateStreamList(string filePath) {
+        private void UpdateStreamList(string filePath) {
             _kinectFile = new KinectFile(filePath);
 
             _kinectStreams.Clear();

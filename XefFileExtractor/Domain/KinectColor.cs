@@ -21,6 +21,9 @@ namespace XefFileExtractor.Domain {
         }
 
         public override void Extract(string outputPath) {
+            string filePath = outputPath + "\\Kinect_Output\\Color\\";
+            Utils.ExistOrCreateDirectory(filePath);
+
             KStudioSeekableEventStream stream = (KStudioSeekableEventStream) _stream;
             int frameCount = _frameAnalysis.FrameCount;
             double[] colorTiming = new double[frameCount];
@@ -49,8 +52,6 @@ namespace XefFileExtractor.Domain {
                     // create frame from the writable bitmap and add to encoder
                     encoder.Frames.Add(BitmapFrame.Create(colorBitmap));
 
-                    string filePath = outputPath + "/Kinect_Output/Color/";
-                    Directory.CreateDirectory(filePath);
                     string path = Path.Combine(filePath, "ColorFrame_" + index + ".bmp");
 
                     // write the new file to disk

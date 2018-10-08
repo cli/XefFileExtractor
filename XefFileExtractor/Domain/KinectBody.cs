@@ -26,8 +26,9 @@ namespace XefFileExtractor.Domain {
             });
 
             // Write timings
-            string filepath = outputPath + "/Kinect_Output";
-            Utils.WriteTimingToFile(filepath + "/body_timing.txt", bodyTiming);
+            string filepath = outputPath + "\\Kinect_Output";
+            Utils.ExistOrCreateDirectory(filepath);
+            Utils.WriteTimingToFile(filepath + "\\body_timing.txt", bodyTiming);
         }
 
         public override FrameAnalysis CountDroppedFrames() {

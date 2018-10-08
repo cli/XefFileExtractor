@@ -17,6 +17,9 @@ namespace XefFileExtractor.Domain {
         public override void Extract(string outputPath) {
             KStudioSeekableEventStream stream = (KStudioSeekableEventStream) _stream;
 
+            string filePath = outputPath + "\\Kinect_Output\\Depth\\";
+            Utils.ExistOrCreateDirectory(filePath);
+
             int frameCount = (int) stream.EventCount;
             double[] depthTiming = new double[frameCount];
 
@@ -37,8 +40,6 @@ namespace XefFileExtractor.Domain {
                 // create frame from the writable bitmap and add to encoder
                 encoder.Frames.Add(BitmapFrame.Create(depthBitmap));
 
-                string filePath = outputPath + "/Kinect_Output/Depth/";
-                Directory.CreateDirectory(filePath);
                 string path = Path.Combine(filePath, "DepthFrame_" + index + ".png");
 
                 // write the new file to disk
@@ -47,7 +48,10 @@ namespace XefFileExtractor.Domain {
                         encoder.Save(fs);
                     }
                 }
-                catch (IOException) { }
+                catch (IOException ex)
+                {
+                    Console.WriteLine(ex.StackTrace);
+                }
 
                 depthTiming[index] = currEvent.RelativeTime.TotalMilliseconds;
 
